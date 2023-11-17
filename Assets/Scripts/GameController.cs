@@ -13,6 +13,7 @@ using UnityEngine.UI;
 public class GameController : MonoBehaviour
 {
     [SerializeField] Text _text;
+    [SerializeField] CanvasGroup _cg;
     static GameController _instance = null;
     static public GameController Instance => _instance;
 
@@ -43,6 +44,8 @@ public class GameController : MonoBehaviour
 
     public void GameOver(int loser)
     {
+        _cg.alpha = 1;
+
         if (loser == 1)
         {
             _text.text = "PLAYER 2 WIN";

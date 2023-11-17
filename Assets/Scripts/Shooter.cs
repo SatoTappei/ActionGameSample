@@ -11,9 +11,16 @@ public class Shooter : MonoBehaviour
     [SerializeField] float _power = 3.0f;
     [SerializeField] GameObject _shooter = null;
     
-    protected void Shot()
+    protected void Shot(Vector3 dir)
     {
-        var shotObj = Instantiate(_shooter, transform.position + transform.forward * 2, transform.rotation);
+        Vector3 muzzle = default;
+        if (dir == Vector3.zero) muzzle = transform.forward;
+        if (dir == Vector3.up * 180) muzzle = -transform.forward;
+        if (dir == Vector3.up * -90) muzzle = -transform.right;
+        if (dir == Vector3.up * 90) muzzle = transform.right;
+
+        var shotObj = Instantiate(_shooter, transform.position + muzzle * 2, transform.rotation);
+        shotObj.transform.eulerAngles = dir;
         var hitCtrl = shotObj.GetComponent<HitCtrl>();
         hitCtrl.SetParameter(_damage, _power);
     }

@@ -7,7 +7,7 @@ public class PlayerShooter : Shooter
     {
         if (Input.GetButtonDown("Fire1"))
         {
-            Shot();
+            //Shot();
         }
     }
 }

@@ -57,6 +57,7 @@ public class HitCtrl : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!other.gameObject.CompareTag("Character")) return;
+        if (other.gameObject.GetComponent<Character>().CharId == 0) return;
         if (GameController.IsGameOver) return;
 
         EffectManager.PlayEffect("Hit", this.transform);

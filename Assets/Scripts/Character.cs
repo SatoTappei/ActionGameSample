@@ -21,8 +21,12 @@ public class Character : MonoBehaviour
 
     public Vector3 HeadPos => _head.transform.position;
 
+    public bool IsPlayerControl => _charId == 1 || _charId == 2;
     public int HP => _hp;
     public int MaxHP { get; protected set; }
+    public int CharId { get => _charId; set => _charId = value; }
+    public GameObject Head { get => _head; set => _head = value; }
+
     LifeChange _lifeChange;
 
     private void Awake()
@@ -30,6 +34,14 @@ public class Character : MonoBehaviour
         _rbody = GetComponent<Rigidbody>();
         MaxHP = _hp;
         _initialPos = transform.position;
+    }
+
+    void Start()
+    {
+        if(CharId == 1 || CharId == 2)
+        {
+            GetComponent<EnemyShooter>().Valid = true;
+        }
     }
 
     public void SetLifeChangeDelegate(LifeChange dlg)
@@ -67,6 +79,9 @@ public class Character : MonoBehaviour
 
     void Update()
     {
+        // IDが0の場合はどちらのプレイヤーでもない
+        if (_charId == 0) return;
+
         _head.transform.position = new Vector3(transform.position.x, 2, transform.position.z);
 
         if (GameController.IsGameOver) return;
@@ -110,15 +125,35 @@ public class Character : MonoBehaviour
         Vector3 pos = transform.position;
 
         RaycastHit hit;
-        if (Physics.Raycast(new Vector3(pos.x, 0.3f, pos.z), new Vector3(dir.x, 0, dir.y), out hit))
+        if (Physics.Raycast(new Vector3(pos.x, 0.3f, pos.z), new Vector3(dir.x, 0, dir.y), out hit,2.0f))
         {
-            //壁に近い場合はダメ
-            if (hit.distance < 2.0f)
+            if (hit.collider.TryGetComponent(out Character c))
             {
-                Debug.Log(hit);
-                return;
+                if (c.IsPlayerControl)
+                {
+                    return;
+                }
+                else
+                {
+                    c.CharId = CharId;
+                    CharId = 0;
+                    c.Head = _head;
+                    Head = null;
+                    GetComponent<EnemyShooter>().Valid = false;
+                    c.GetComponent<EnemyShooter>().Valid = true;
+                }
             }
         }
+
+        //if (Physics.Raycast(new Vector3(pos.x, 0.3f, pos.z), new Vector3(dir.x, 0, dir.y), out hit))
+        //{
+        //    //壁に近い場合はダメ
+        //    if (hit.distance < 2.0f)
+        //    {
+        //        Debug.Log(hit);
+        //        return;
+        //    }
+        //}
 
         //ノックバック分丸める
         float x = Mathf.Round(pos.x - _initialPos.x);
@@ -128,13 +163,16 @@ public class Character : MonoBehaviour
         y = y - y % 2.0f;
 
         //移動
-        transform.position = _initialPos + new Vector3(x + dir.x * 2.0f, pos.y, y + dir.y * 2.0f);
+        transform.position = _initialPos + new Vector3(x + dir.x * 2.0f, 0, y + dir.y * 2.0f);
 
         _moveTimer = _moveInterval;
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-
+        if (collision.gameObject.TryGetComponent(out Character chara))
+        {
+            Debug.Log("他人");
+        }
     }
 }
